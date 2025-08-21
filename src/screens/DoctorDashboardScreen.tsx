@@ -1,3 +1,5 @@
+// Código completo do DoctorDashboardScreen com comentários detalhados, seguindo metodologia de aula
+
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { ScrollView, ViewStyle, TextStyle } from 'react-native';
@@ -11,10 +13,12 @@ import theme from '../styles/theme';
 import Header from '../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Tipagem da navegação da tela DoctorDashboard
 type DoctorDashboardScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'DoctorDashboard'>;
 };
 
+// Interface de uma consulta médica
 interface Appointment {
   id: string;
   patientId: string;
@@ -27,10 +31,12 @@ interface Appointment {
   status: 'pending' | 'confirmed' | 'cancelled';
 }
 
+// Tipagem para componentes estilizados que recebem status
 interface StyledProps {
   status: string;
 }
 
+// Função que retorna a cor de acordo com o status da consulta
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'confirmed':
@@ -42,6 +48,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
+// Função que retorna o texto do status da consulta
 const getStatusText = (status: string) => {
   switch (status) {
     case 'confirmed':
@@ -53,12 +60,14 @@ const getStatusText = (status: string) => {
   }
 };
 
+// Componente principal da tela DoctorDashboard
 const DoctorDashboardScreen: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useAuth(); // Contexto de autenticação
   const navigation = useNavigation<DoctorDashboardScreenProps['navigation']>();
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [appointments, setAppointments] = useState<Appointment[]>([]); // Estado de consultas
+  const [loading, setLoading] = useState(true); // Estado de carregamento
 
+  // Função para carregar consultas do médico autenticado
   const loadAppointments = async () => {
     try {
       const storedAppointments = await AsyncStorage.getItem('@MedicalApp:appointments');
@@ -72,10 +81,11 @@ const DoctorDashboardScreen: React.FC = () => {
     } catch (error) {
       console.error('Erro ao carregar consultas:', error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Finaliza carregamento
     }
   };
 
+  // Função para atualizar status de uma consulta
   const handleUpdateStatus = async (appointmentId: string, newStatus: 'confirmed' | 'cancelled') => {
     try {
       const storedAppointments = await AsyncStorage.getItem('@MedicalApp:appointments');
@@ -83,19 +93,19 @@ const DoctorDashboardScreen: React.FC = () => {
         const allAppointments: Appointment[] = JSON.parse(storedAppointments);
         const updatedAppointments = allAppointments.map(appointment => {
           if (appointment.id === appointmentId) {
-            return { ...appointment, status: newStatus };
+            return { ...appointment, status: newStatus }; // Atualiza status
           }
           return appointment;
         });
         await AsyncStorage.setItem('@MedicalApp:appointments', JSON.stringify(updatedAppointments));
-        loadAppointments(); // Recarrega a lista
+        loadAppointments(); // Recarrega a lista após atualização
       }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
     }
   };
 
-  // Carrega as consultas quando a tela estiver em foco
+  // Hook que carrega as consultas sempre que a tela ganha foco
   useFocusEffect(
     React.useCallback(() => {
       loadAppointments();
@@ -104,10 +114,11 @@ const DoctorDashboardScreen: React.FC = () => {
 
   return (
     <Container>
-      <Header />
+      <Header /> {/* Cabeçalho da tela */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Title>Minhas Consultas</Title>
 
+        {/* Botão para acessar perfil */}
         <Button
           title="Meu Perfil"
           onPress={() => navigation.navigate('Profile')}
@@ -115,6 +126,7 @@ const DoctorDashboardScreen: React.FC = () => {
           buttonStyle={styles.buttonStyle}
         />
 
+        {/* Exibe consultas ou mensagem de carregamento/vazio */}
         {loading ? (
           <LoadingText>Carregando consultas...</LoadingText>
         ) : appointments.length === 0 ? (
@@ -123,23 +135,24 @@ const DoctorDashboardScreen: React.FC = () => {
           appointments.map((appointment) => (
             <AppointmentCard key={appointment.id}>
               <ListItem.Content>
-              <ListItem.Title style={styles.patientName as TextStyle}>
-                Paciente: {appointment.patientName || 'Nome não disponível'}
-              </ListItem.Title>
-                
-              <ListItem.Subtitle style={styles.dateTime as TextStyle}>
+                <ListItem.Title style={styles.patientName as TextStyle}>
+                  Paciente: {appointment.patientName || 'Nome não disponível'}
+                </ListItem.Title>
+                <ListItem.Subtitle style={styles.dateTime as TextStyle}>
                   {appointment.date} às {appointment.time}
-              </ListItem.Subtitle>
-
-              <Text style={styles.specialty as TextStyle}>
+                </ListItem.Subtitle>
+                <Text style={styles.specialty as TextStyle}>
                   {appointment.specialty}
-              </Text>
+                </Text>
 
+                {/* Badge do status da consulta */}
                 <StatusBadge status={appointment.status}>
                   <StatusText status={appointment.status}>
                     {getStatusText(appointment.status)}
                   </StatusText>
                 </StatusBadge>
+
+                {/* Botões de ação para consultas pendentes */}
                 {appointment.status === 'pending' && (
                   <ButtonContainer>
                     <Button
@@ -161,6 +174,7 @@ const DoctorDashboardScreen: React.FC = () => {
           ))
         )}
 
+        {/* Botão de logout */}
         <Button
           title="Sair"
           onPress={signOut}
@@ -172,41 +186,19 @@ const DoctorDashboardScreen: React.FC = () => {
   );
 };
 
+// Estilos do componente
 const styles = {
-  scrollContent: {
-    padding: 20,
-  },
-  button: {
-    marginBottom: 20,
-    width: '100%',
-  },
-  buttonStyle: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 12,
-  },
-  logoutButton: {
-    backgroundColor: theme.colors.error,
-    paddingVertical: 12,
-  },
-  actionButton: {
-    marginTop: 8,
-    width: '48%',
-  },
-  confirmButton: {
-    backgroundColor: theme.colors.success,
-    paddingVertical: 8,
-  },
-  cancelButton: {
-    backgroundColor: theme.colors.error,
-    paddingVertical: 8,
-  },
-  dateTime: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.text,
-  },
+  scrollContent: { padding: 20 },
+  button: { marginBottom: 20, width: '100%' },
+  buttonStyle: { backgroundColor: theme.colors.primary, paddingVertical: 12 },
+  logoutButton: { backgroundColor: theme.colors.error, paddingVertical: 12 },
+  actionButton: { marginTop: 8, width: '48%' },
+  confirmButton: { backgroundColor: theme.colors.success, paddingVertical: 8 },
+  cancelButton: { backgroundColor: theme.colors.error, paddingVertical: 8 },
+  dateTime: { fontSize: 16, fontWeight: '700', color: theme.colors.text },
 };
 
+// Componentes estilizados
 const Container = styled.View`
   flex: 1;
   background-color: ${theme.colors.background};
@@ -263,4 +255,4 @@ const ButtonContainer = styled.View`
   margin-top: 8px;
 `;
 
-export default DoctorDashboardScreen; 
+export default DoctorDashboardScreen;

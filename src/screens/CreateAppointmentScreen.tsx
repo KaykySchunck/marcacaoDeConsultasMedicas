@@ -83,4 +83,107 @@ const CreateAppointmentScreen: React.FC = () => {
         doctorName: selectedDoctor.name,
         date,
         time: selectedTime,
-        speci
+        specialty: selectedDoctor.specialty,
+        status: 'pending',
+      };
+
+      // Adiciona nova consulta à lista
+      appointments.push(newAppointment);
+
+      // Salva a lista atualizada no AsyncStorage
+      await AsyncStorage.setItem('@MedicalApp:appointments', JSON.stringify(appointments));
+
+      alert('Consulta agendada com sucesso!');
+      navigation.goBack(); // Retorna à tela anterior
+    } catch (err) {
+      setError('Erro ao agendar consulta. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Container>
+      <Header /> {/* Cabeçalho da tela */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Title>Agendar Consulta</Title>
+
+        {/* Campo para inserir a data */}
+        <Input
+          placeholder="Data (DD/MM/AAAA)"
+          value={date}
+          onChangeText={setDate}
+          containerStyle={styles.input}
+          keyboardType="numeric"
+        />
+
+        {/* Seção para selecionar horário */}
+        <SectionTitle>Selecione um Horário</SectionTitle>
+        <TimeSlotList onSelectTime={setSelectedTime} selectedTime={selectedTime} />
+
+        {/* Seção para selecionar médico */}
+        <SectionTitle>Selecione um Médico</SectionTitle>
+        <DoctorList doctors={availableDoctors} onSelectDoctor={setSelectedDoctor} selectedDoctorId={selectedDoctor?.id} />
+
+        {/* Exibe erro caso haja */}
+        {error ? <ErrorText>{error}</ErrorText> : null}
+
+        {/* Botão de agendar */}
+        <Button
+          title="Agendar"
+          onPress={handleCreateAppointment}
+          loading={loading}
+          containerStyle={styles.button as ViewStyle}
+          buttonStyle={styles.buttonStyle}
+        />
+
+        {/* Botão de cancelar */}
+        <Button
+          title="Cancelar"
+          onPress={() => navigation.goBack()}
+          containerStyle={styles.button as ViewStyle}
+          buttonStyle={styles.cancelButton}
+        />
+      </ScrollView>
+    </Container>
+  );
+};
+
+// Estilos do componente
+const styles = {
+  scrollContent: { padding: 20 },
+  input: { marginBottom: 15 },
+  button: { marginTop: 10, width: '100%' },
+  buttonStyle: { backgroundColor: theme.colors.primary, paddingVertical: 12 },
+  cancelButton: { backgroundColor: theme.colors.secondary, paddingVertical: 12 },
+};
+
+// Componentes estilizados
+const Container = styled.View`
+  flex: 1;
+  background-color: ${theme.colors.background};
+`;
+
+const Title = styled.Text`
+  font-size: 24px;
+  font-weight: bold;
+  color: ${theme.colors.text};
+  margin-bottom: 20px;
+  text-align: center;
+`;
+
+const SectionTitle = styled.Text`
+  font-size: 18px;
+  font-weight: bold;
+  color: ${theme.colors.text};
+  margin-bottom: 10px;
+  margin-top: 10px;
+`;
+
+const ErrorText = styled.Text`
+  color: ${theme.colors.error};
+  text-align: center;
+  margin-bottom: 10px;
+`;
+
+export default CreateAppointmentScreen;
