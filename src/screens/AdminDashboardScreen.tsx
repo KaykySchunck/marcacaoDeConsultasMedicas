@@ -1,3 +1,5 @@
+// Código completo do AdminDashboardScreen com comentários detalhados, seguindo metodologia de aula
+
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { ScrollView, ViewStyle, TextStyle } from 'react-native';
@@ -11,10 +13,12 @@ import theme from '../styles/theme';
 import Header from '../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Tipagem para a navegação da tela AdminDashboard
 type AdminDashboardScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'AdminDashboard'>;
 };
 
+// Interface de uma consulta médica
 interface Appointment {
   id: string;
   patientId: string;
@@ -26,6 +30,7 @@ interface Appointment {
   status: 'pending' | 'confirmed' | 'cancelled';
 }
 
+// Interface de um usuário
 interface User {
   id: string;
   name: string;
@@ -33,10 +38,12 @@ interface User {
   role: 'admin' | 'doctor' | 'patient';
 }
 
+// Tipagem para componentes estilizados que recebem status
 interface StyledProps {
   status: string;
 }
 
+// Função que retorna a cor de acordo com o status da consulta
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'confirmed':
@@ -48,6 +55,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
+// Função que retorna o texto do status da consulta
 const getStatusText = (status: string) => {
   switch (status) {
     case 'confirmed':
@@ -59,23 +67,25 @@ const getStatusText = (status: string) => {
   }
 };
 
+// Componente principal da tela AdminDashboard
 const AdminDashboardScreen: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useAuth(); // Contexto de autenticação
   const navigation = useNavigation<AdminDashboardScreenProps['navigation']>();
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [appointments, setAppointments] = useState<Appointment[]>([]); // Estado de consultas
+  const [users, setUsers] = useState<User[]>([]); // Estado de usuários
+  const [loading, setLoading] = useState(true); // Estado de carregamento
 
+  // Função para carregar dados de AsyncStorage
   const loadData = async () => {
     try {
-      // Carrega consultas
+      // Carrega consultas do AsyncStorage
       const storedAppointments = await AsyncStorage.getItem('@MedicalApp:appointments');
       if (storedAppointments) {
         const allAppointments: Appointment[] = JSON.parse(storedAppointments);
         setAppointments(allAppointments);
       }
 
-      // Carrega usuários
+      // Carrega usuários do AsyncStorage
       const storedUsers = await AsyncStorage.getItem('@MedicalApp:users');
       if (storedUsers) {
         const allUsers: User[] = JSON.parse(storedUsers);
@@ -84,17 +94,18 @@ const AdminDashboardScreen: React.FC = () => {
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Finaliza carregamento
     }
   };
 
-  // Carrega os dados quando a tela estiver em foco
+  // Hook que carrega dados sempre que a tela ganha foco
   useFocusEffect(
     React.useCallback(() => {
       loadData();
     }, [])
   );
 
+  // Função para atualizar o status de uma consulta
   const handleUpdateStatus = async (appointmentId: string, newStatus: 'confirmed' | 'cancelled') => {
     try {
       const storedAppointments = await AsyncStorage.getItem('@MedicalApp:appointments');
@@ -102,12 +113,12 @@ const AdminDashboardScreen: React.FC = () => {
         const allAppointments: Appointment[] = JSON.parse(storedAppointments);
         const updatedAppointments = allAppointments.map(appointment => {
           if (appointment.id === appointmentId) {
-            return { ...appointment, status: newStatus };
+            return { ...appointment, status: newStatus }; // Atualiza status
           }
           return appointment;
         });
         await AsyncStorage.setItem('@MedicalApp:appointments', JSON.stringify(updatedAppointments));
-        loadData(); // Recarrega os dados
+        loadData(); // Recarrega dados após atualização
       }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
@@ -116,10 +127,11 @@ const AdminDashboardScreen: React.FC = () => {
 
   return (
     <Container>
-      <Header />
+      <Header /> {/* Cabeçalho da tela */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Title>Painel Administrativo</Title>
 
+        {/* Botão para gerenciar usuários */}
         <Button
           title="Gerenciar Usuários"
           onPress={() => navigation.navigate('UserManagement')}
@@ -127,6 +139,7 @@ const AdminDashboardScreen: React.FC = () => {
           buttonStyle={styles.buttonStyle}
         />
 
+        {/* Botão para acessar perfil */}
         <Button
           title="Meu Perfil"
           onPress={() => navigation.navigate('Profile')}
@@ -140,6 +153,7 @@ const AdminDashboardScreen: React.FC = () => {
         ) : appointments.length === 0 ? (
           <EmptyText>Nenhuma consulta agendada</EmptyText>
         ) : (
+          // Lista de consultas
           appointments.map((appointment) => (
             <AppointmentCard key={appointment.id}>
               <ListItem.Content>
@@ -159,6 +173,7 @@ const AdminDashboardScreen: React.FC = () => {
                 </StatusBadge>
                 {appointment.status === 'pending' && (
                   <ButtonContainer>
+                    {/* Botões de ação para confirmar ou cancelar */}
                     <Button
                       title="Confirmar"
                       onPress={() => handleUpdateStatus(appointment.id, 'confirmed')}
@@ -178,6 +193,7 @@ const AdminDashboardScreen: React.FC = () => {
           ))
         )}
 
+        {/* Botão de logout */}
         <Button
           title="Sair"
           onPress={signOut}
@@ -189,6 +205,7 @@ const AdminDashboardScreen: React.FC = () => {
   );
 };
 
+// Estilos do componente
 const styles = {
   scrollContent: {
     padding: 20,
@@ -234,6 +251,7 @@ const styles = {
   },
 };
 
+// Componentes estilizados com styled-components
 const Container = styled.View`
   flex: 1;
   background-color: ${theme.colors.background};
@@ -298,4 +316,4 @@ const ButtonContainer = styled.View`
   margin-top: 8px;
 `;
 
-export default AdminDashboardScreen; 
+export default AdminDashboardScreen;
