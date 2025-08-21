@@ -14,31 +14,40 @@ import AdminDashboardScreen from '../screens/AdminDashboardScreen';
 import DoctorDashboardScreen from '../screens/DoctorDashboardScreen';
 import PatientDashboardScreen from '../screens/PatientDashboardScreen';
 
+/**
+ * Stack Navigator tipado para a aplicação
+ */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+/**
+ * Componente principal de navegação da aplicação
+ * Decide quais telas mostrar com base no usuário autenticado
+ */
 export const AppNavigator: React.FC = () => {
   const { user, loading } = useAuth();
 
+  // Enquanto carrega dados do usuário, não renderiza nada (ou poderia mostrar loading)
   if (loading) {
-    return null; // Ou um componente de loading
+    return null;
   }
 
   return (
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
-          headerShown: false,
+          headerShown: false, // Oculta o header padrão
         }}
       >
         {!user ? (
-          // Rotas públicas
+          // Rotas públicas (não autenticado)
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
           </>
         ) : (
-          // Rotas protegidas
+          // Rotas protegidas (usuário logado)
           <>
+            {/* Rotas específicas por tipo de usuário */}
             {user.role === 'admin' && (
               <Stack.Screen 
                 name="AdminDashboard" 
@@ -84,4 +93,4 @@ export const AppNavigator: React.FC = () => {
       </Stack.Navigator>
     </NavigationContainer>
   );
-}; 
+};
