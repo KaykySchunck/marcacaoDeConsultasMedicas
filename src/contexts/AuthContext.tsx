@@ -3,23 +3,35 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/auth';
 import { User, LoginCredentials, RegisterData, AuthContextData } from '../types/auth';
 
-// Chaves de armazenamento
+/**
+ * Chaves utilizadas no AsyncStorage para salvar usuário e token
+ */
 const STORAGE_KEYS = {
   USER: '@MedicalApp:user',
   TOKEN: '@MedicalApp:token',
 };
 
+/**
+ * Cria o contexto de autenticação
+ */
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
+/**
+ * Provedor de autenticação que encapsula toda a aplicação
+ */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null); // Usuário logado
+  const [loading, setLoading] = useState(true);       // Estado de carregamento inicial
 
+  // Carrega usuário armazenado e usuários registrados ao montar o componente
   useEffect(() => {
     loadStoredUser();
     loadRegisteredUsers();
   }, []);
 
+  /**
+   * Carrega usuário armazenado no AsyncStorage
+   */
   const loadStoredUser = async () => {
     try {
       const storedUser = await authService.getStoredUser();
@@ -33,6 +45,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Carrega lista de usuários registrados (simulação)
+   */
   const loadRegisteredUsers = async () => {
     try {
       await authService.loadRegisteredUsers();
@@ -41,6 +56,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Função de login
+   */
   const signIn = async (credentials: LoginCredentials) => {
     try {
       const response = await authService.signIn(credentials);
@@ -52,6 +70,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Função de registro de usuário
+   */
   const register = async (data: RegisterData) => {
     try {
       const response = await authService.register(data);
@@ -63,6 +84,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Função de logout
+   */
   const signOut = async () => {
     try {
       await authService.signOut();
@@ -81,10 +105,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+/**
+ * Hook customizado para acessar o contexto de autenticação
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+};
