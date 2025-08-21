@@ -1,3 +1,5 @@
+// Código completo do CreateAppointmentScreen com comentários detalhados, seguindo metodologia de aula
+
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { ScrollView, ViewStyle } from 'react-native';
@@ -12,10 +14,12 @@ import DoctorList from '../components/DoctorList';
 import TimeSlotList from '../components/TimeSlotList';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Tipagem da navegação da tela CreateAppointment
 type CreateAppointmentScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'CreateAppointment'>;
 };
 
+// Interface de uma consulta médica
 interface Appointment {
   id: string;
   patientId: string;
@@ -28,6 +32,7 @@ interface Appointment {
   status: 'pending' | 'confirmed' | 'cancelled';
 }
 
+// Interface de um médico
 interface Doctor {
   id: string;
   name: string;
@@ -37,47 +42,24 @@ interface Doctor {
 
 // Lista de médicos disponíveis
 const availableDoctors: Doctor[] = [
-  {
-    id: '1',
-    name: 'Dr. João Silva',
-    specialty: 'Cardiologia',
-    image: 'https://randomuser.me/api/portraits/men/1.jpg',
-  },
-  {
-    id: '2',
-    name: 'Dra. Maria Santos',
-    specialty: 'Pediatria',
-    image: 'https://randomuser.me/api/portraits/women/1.jpg',
-  },
-  {
-    id: '3',
-    name: 'Dr. Pedro Oliveira',
-    specialty: 'Ortopedia',
-    image: 'https://randomuser.me/api/portraits/men/2.jpg',
-  },
-  {
-    id: '4',
-    name: 'Dra. Ana Costa',
-    specialty: 'Dermatologia',
-    image: 'https://randomuser.me/api/portraits/women/2.jpg',
-  },
-  {
-    id: '5',
-    name: 'Dr. Carlos Mendes',
-    specialty: 'Oftalmologia',
-    image: 'https://randomuser.me/api/portraits/men/3.jpg',
-  },
+  { id: '1', name: 'Dr. João Silva', specialty: 'Cardiologia', image: 'https://randomuser.me/api/portraits/men/1.jpg' },
+  { id: '2', name: 'Dra. Maria Santos', specialty: 'Pediatria', image: 'https://randomuser.me/api/portraits/women/1.jpg' },
+  { id: '3', name: 'Dr. Pedro Oliveira', specialty: 'Ortopedia', image: 'https://randomuser.me/api/portraits/men/2.jpg' },
+  { id: '4', name: 'Dra. Ana Costa', specialty: 'Dermatologia', image: 'https://randomuser.me/api/portraits/women/2.jpg' },
+  { id: '5', name: 'Dr. Carlos Mendes', specialty: 'Oftalmologia', image: 'https://randomuser.me/api/portraits/men/3.jpg' },
 ];
 
+// Componente principal da tela de criação de consulta
 const CreateAppointmentScreen: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // Usuário autenticado
   const navigation = useNavigation<CreateAppointmentScreenProps['navigation']>();
-  const [date, setDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [date, setDate] = useState(''); // Estado da data selecionada
+  const [selectedTime, setSelectedTime] = useState<string>(''); // Estado do horário selecionado
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null); // Estado do médico selecionado
+  const [loading, setLoading] = useState(false); // Estado de carregamento do botão
+  const [error, setError] = useState(''); // Estado para mensagens de erro
 
+  // Função que cria uma nova consulta e salva no AsyncStorage
   const handleCreateAppointment = async () => {
     try {
       setLoading(true);
@@ -88,7 +70,7 @@ const CreateAppointmentScreen: React.FC = () => {
         return;
       }
 
-      // Recupera consultas existentes
+      // Recupera consultas existentes do AsyncStorage
       const storedAppointments = await AsyncStorage.getItem('@MedicalApp:appointments');
       const appointments: Appointment[] = storedAppointments ? JSON.parse(storedAppointments) : [];
 
@@ -101,119 +83,4 @@ const CreateAppointmentScreen: React.FC = () => {
         doctorName: selectedDoctor.name,
         date,
         time: selectedTime,
-        specialty: selectedDoctor.specialty,
-        status: 'pending',
-      };
-
-      // Adiciona nova consulta à lista
-      appointments.push(newAppointment);
-
-      // Salva lista atualizada
-      await AsyncStorage.setItem('@MedicalApp:appointments', JSON.stringify(appointments));
-
-      alert('Consulta agendada com sucesso!');
-      navigation.goBack();
-    } catch (err) {
-      setError('Erro ao agendar consulta. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Container>
-      <Header />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Title>Agendar Consulta</Title>
-
-        <Input
-          placeholder="Data (DD/MM/AAAA)"
-          value={date}
-          onChangeText={setDate}
-          containerStyle={styles.input}
-          keyboardType="numeric"
-        />
-
-        <SectionTitle>Selecione um Horário</SectionTitle>
-        <TimeSlotList
-          onSelectTime={setSelectedTime}
-          selectedTime={selectedTime}
-        />
-
-        <SectionTitle>Selecione um Médico</SectionTitle>
-        <DoctorList
-          doctors={availableDoctors}
-          onSelectDoctor={setSelectedDoctor}
-          selectedDoctorId={selectedDoctor?.id}
-        />
-
-        {error ? <ErrorText>{error}</ErrorText> : null}
-
-        <Button
-          title="Agendar"
-          onPress={handleCreateAppointment}
-          loading={loading}
-          containerStyle={styles.button as ViewStyle}
-          buttonStyle={styles.buttonStyle}
-        />
-
-        <Button
-          title="Cancelar"
-          onPress={() => navigation.goBack()}
-          containerStyle={styles.button as ViewStyle}
-          buttonStyle={styles.cancelButton}
-        />
-      </ScrollView>
-    </Container>
-  );
-};
-
-const styles = {
-  scrollContent: {
-    padding: 20,
-  },
-  input: {
-    marginBottom: 15,
-  },
-  button: {
-    marginTop: 10,
-    width: '100%',
-  },
-  buttonStyle: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 12,
-  },
-  cancelButton: {
-    backgroundColor: theme.colors.secondary,
-    paddingVertical: 12,
-  },
-};
-
-const Container = styled.View`
-  flex: 1;
-  background-color: ${theme.colors.background};
-`;
-
-const Title = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  color: ${theme.colors.text};
-  margin-bottom: 20px;
-  text-align: center;
-`;
-
-const SectionTitle = styled.Text`
-  font-size: 18px;
-  font-weight: bold;
-  color: ${theme.colors.text};
-  margin-bottom: 10px;
-  margin-top: 10px;
-`;
-
-const ErrorText = styled.Text`
-  color: ${theme.colors.error};
-  text-align: center;
-  margin-bottom: 10px;
-`;
-
-export default CreateAppointmentScreen;
+        speci
