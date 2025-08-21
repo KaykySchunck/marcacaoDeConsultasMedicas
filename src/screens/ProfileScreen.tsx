@@ -1,13 +1,15 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { Button, ListItem } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import theme from '../styles/theme';
 import Header from '../components/Header';
+import { ViewStyle } from 'react-native';
 
+// Tipagem da navegação
 type ProfileScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 };
@@ -16,6 +18,7 @@ const ProfileScreen: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigation = useNavigation<ProfileScreenProps['navigation']>();
 
+  // Função que retorna o texto legível do papel do usuário
   const getRoleText = (role: string) => {
     switch (role) {
       case 'admin':
@@ -32,9 +35,10 @@ const ProfileScreen: React.FC = () => {
   return (
     <Container>
       <Header />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <Scroll contentContainerStyle={styles.scrollContent}>
         <Title>Meu Perfil</Title>
 
+        {/* Card com informações do usuário */}
         <ProfileCard>
           <Avatar source={{ uri: user?.image || 'https://via.placeholder.com/150' }} />
           <Name>{user?.name}</Name>
@@ -42,12 +46,14 @@ const ProfileScreen: React.FC = () => {
           <RoleBadge role={user?.role || ''}>
             <RoleText>{getRoleText(user?.role || '')}</RoleText>
           </RoleBadge>
-          
+
+          {/* Exibe especialidade apenas se for médico */}
           {user?.role === 'doctor' && (
             <SpecialtyText>Especialidade: {user?.specialty}</SpecialtyText>
           )}
         </ProfileCard>
 
+        {/* Botão para voltar à tela anterior */}
         <Button
           title="Voltar"
           onPress={() => navigation.goBack()}
@@ -55,17 +61,19 @@ const ProfileScreen: React.FC = () => {
           buttonStyle={styles.buttonStyle}
         />
 
+        {/* Botão para logout */}
         <Button
           title="Sair"
           onPress={signOut}
           containerStyle={styles.button as ViewStyle}
           buttonStyle={styles.logoutButton}
         />
-      </ScrollView>
+      </Scroll>
     </Container>
   );
 };
 
+// Estilos
 const styles = {
   scrollContent: {
     padding: 20,
@@ -84,15 +92,18 @@ const styles = {
   },
 };
 
+// Container principal
 const Container = styled.View`
   flex: 1;
   background-color: ${theme.colors.background};
 `;
 
-const ScrollView = styled.ScrollView`
+// ScrollView com padding
+const Scroll = styled.ScrollView`
   flex: 1;
 `;
 
+// Título da tela
 const Title = styled.Text`
   font-size: 24px;
   font-weight: bold;
@@ -101,6 +112,7 @@ const Title = styled.Text`
   text-align: center;
 `;
 
+// Card do perfil
 const ProfileCard = styled.View`
   background-color: ${theme.colors.background};
   border-radius: 8px;
@@ -111,6 +123,7 @@ const ProfileCard = styled.View`
   border-color: ${theme.colors.border};
 `;
 
+// Avatar do usuário
 const Avatar = styled.Image`
   width: 120px;
   height: 120px;
@@ -118,6 +131,7 @@ const Avatar = styled.Image`
   margin-bottom: 16px;
 `;
 
+// Nome do usuário
 const Name = styled.Text`
   font-size: 20px;
   font-weight: bold;
@@ -125,12 +139,14 @@ const Name = styled.Text`
   margin-bottom: 8px;
 `;
 
+// Email do usuário
 const Email = styled.Text`
   font-size: 16px;
   color: ${theme.colors.text};
   margin-bottom: 8px;
 `;
 
+// Badge de papel do usuário
 const RoleBadge = styled.View<{ role: string }>`
   background-color: ${(props) => {
     switch (props.role) {
@@ -147,12 +163,14 @@ const RoleBadge = styled.View<{ role: string }>`
   margin-bottom: 8px;
 `;
 
+// Texto dentro do badge
 const RoleText = styled.Text`
   color: ${theme.colors.text};
   font-size: 14px;
   font-weight: 500;
 `;
 
+// Texto para especialidade do médico
 const SpecialtyText = styled.Text`
   font-size: 16px;
   color: ${theme.colors.text};

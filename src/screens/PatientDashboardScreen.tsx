@@ -11,10 +11,12 @@ import theme from '../styles/theme';
 import Header from '../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Tipagem da navegação
 type PatientDashboardScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'PatientDashboard'>;
 };
 
+// Tipagem de uma consulta
 interface Appointment {
   id: string;
   patientId: string;
@@ -27,10 +29,12 @@ interface Appointment {
   status: 'pending' | 'confirmed' | 'cancelled';
 }
 
+// Tipagem para estilização do badge de status
 interface StyledProps {
   status: string;
 }
 
+// Função que retorna a cor de acordo com o status
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'confirmed':
@@ -42,6 +46,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
+// Função que retorna o texto de acordo com o status
 const getStatusText = (status: string) => {
   switch (status) {
     case 'confirmed':
@@ -59,11 +64,13 @@ const PatientDashboardScreen: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Função para carregar as consultas do paciente
   const loadAppointments = async () => {
     try {
       const storedAppointments = await AsyncStorage.getItem('@MedicalApp:appointments');
       if (storedAppointments) {
         const allAppointments: Appointment[] = JSON.parse(storedAppointments);
+        // Filtra apenas as consultas do usuário logado
         const userAppointments = allAppointments.filter(
           (appointment) => appointment.patientId === user?.id
         );
@@ -76,7 +83,7 @@ const PatientDashboardScreen: React.FC = () => {
     }
   };
 
-  // Carrega as consultas quando a tela estiver em foco
+  // Carrega as consultas sempre que a tela estiver em foco
   useFocusEffect(
     React.useCallback(() => {
       loadAppointments();
@@ -89,6 +96,7 @@ const PatientDashboardScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Title>Minhas Consultas</Title>
 
+        {/* Botão para criar nova consulta */}
         <Button
           title="Agendar Nova Consulta"
           onPress={() => navigation.navigate('CreateAppointment')}
@@ -96,6 +104,7 @@ const PatientDashboardScreen: React.FC = () => {
           buttonStyle={styles.buttonStyle}
         />
 
+        {/* Botão para acessar perfil */}
         <Button
           title="Meu Perfil"
           onPress={() => navigation.navigate('Profile')}
@@ -103,6 +112,7 @@ const PatientDashboardScreen: React.FC = () => {
           buttonStyle={styles.buttonStyle}
         />
 
+        {/* Lista de consultas */}
         {loading ? (
           <LoadingText>Carregando consultas...</LoadingText>
         ) : appointments.length === 0 ? (
@@ -112,16 +122,22 @@ const PatientDashboardScreen: React.FC = () => {
             <AppointmentCard key={appointment.id}>
               <ListItem.Content>
 
-              <ListItem.Subtitle style={styles.dateTime as TextStyle}>
-                {appointment.date} às {appointment.time}
-              </ListItem.Subtitle>
-              <Text style={styles.doctorName as TextStyle}>
-                {appointment.doctorName}
-              </Text>
-              <Text style={styles.specialty as TextStyle}>
-                {appointment.specialty}
-              </Text>
+                {/* Data e hora formatadas */}
+                <ListItem.Subtitle style={styles.dateTime as TextStyle}>
+                  {new Date(appointment.date).toLocaleDateString()} às {appointment.time}
+                </ListItem.Subtitle>
 
+                {/* Nome do médico */}
+                <Text style={styles.doctorName as TextStyle}>
+                  {appointment.doctorName}
+                </Text>
+
+                {/* Especialidade */}
+                <Text style={styles.specialty as TextStyle}>
+                  {appointment.specialty}
+                </Text>
+
+                {/* Badge de status */}
                 <StatusBadge status={appointment.status}>
                   <StatusText status={appointment.status}>
                     {getStatusText(appointment.status)}
@@ -132,6 +148,7 @@ const PatientDashboardScreen: React.FC = () => {
           ))
         )}
 
+        {/* Botão para logout */}
         <Button
           title="Sair"
           onPress={signOut}
@@ -143,6 +160,7 @@ const PatientDashboardScreen: React.FC = () => {
   );
 };
 
+// Estilos
 const styles = {
   scrollContent: {
     padding: 20,
@@ -174,20 +192,20 @@ const styles = {
     color: theme.colors.text,
     marginTop: 4,
   },
-
   patientName: {
     fontSize: 16,
     fontWeight: '700',
     color: theme.colors.text,
   },
-
 };
 
+// Container principal
 const Container = styled.View`
   flex: 1;
   background-color: ${theme.colors.background};
 `;
 
+// Título da tela
 const Title = styled.Text`
   font-size: 24px;
   font-weight: bold;
@@ -196,6 +214,7 @@ const Title = styled.Text`
   text-align: center;
 `;
 
+// Card de cada consulta
 const AppointmentCard = styled(ListItem)`
   background-color: ${theme.colors.background};
   border-radius: 8px;
@@ -205,6 +224,7 @@ const AppointmentCard = styled(ListItem)`
   border-color: ${theme.colors.border};
 `;
 
+// Texto exibido enquanto carrega consultas
 const LoadingText = styled.Text`
   text-align: center;
   color: ${theme.colors.text};
@@ -212,6 +232,7 @@ const LoadingText = styled.Text`
   margin-top: 20px;
 `;
 
+// Texto exibido quando não há consultas
 const EmptyText = styled.Text`
   text-align: center;
   color: ${theme.colors.text};
@@ -219,6 +240,7 @@ const EmptyText = styled.Text`
   margin-top: 20px;
 `;
 
+// Badge de status da consulta
 const StatusBadge = styled.View<StyledProps>`
   background-color: ${(props: StyledProps) => getStatusColor(props.status) + '20'};
   padding: 4px 8px;
@@ -227,10 +249,11 @@ const StatusBadge = styled.View<StyledProps>`
   margin-top: 8px;
 `;
 
+// Texto dentro do badge
 const StatusText = styled.Text<StyledProps>`
   color: ${(props: StyledProps) => getStatusColor(props.status)};
   font-size: 12px;
   font-weight: 500;
 `;
 
-export default PatientDashboardScreen; 
+export default PatientDashboardScreen;
