@@ -1,3 +1,5 @@
+// Arquivo antes da modularização
+
 /*import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { ScrollView, ViewStyle } from 'react-native';
