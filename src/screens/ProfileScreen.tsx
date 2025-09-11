@@ -1,3 +1,4 @@
+//Arquivo Comentado para futuro estudo e modularizado já
 /*import React from 'react';
 import styled from 'styled-components/native';
 import { Button, ListItem } from 'react-native-elements';
