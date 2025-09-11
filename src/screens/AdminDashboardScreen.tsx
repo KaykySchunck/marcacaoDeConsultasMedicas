@@ -1,3 +1,4 @@
+//Arquivo original comentado, para analise de estudo antes da modularização
 /*import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { ScrollView, ViewStyle, TextStyle } from 'react-native';
