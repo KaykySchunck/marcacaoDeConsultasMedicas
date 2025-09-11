@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+/*import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { ScrollView, ViewStyle } from 'react-native';
 import { Button, Input } from 'react-native-elements';
@@ -216,4 +216,4 @@ const ErrorText = styled.Text`
   margin-bottom: 10px;
 `;
 
-export default CreateAppointmentScreen;
+export default CreateAppointmentScreen;*/

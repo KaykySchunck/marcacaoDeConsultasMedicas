@@ -1,4 +1,4 @@
-import React from 'react';
+/*import React from 'react';
 import styled from 'styled-components/native';
 import { Button, ListItem } from 'react-native-elements';
 import { useAuth } from '../contexts/AuthContext';
@@ -159,4 +159,4 @@ const SpecialtyText = styled.Text`
   margin-top: 8px;
 `;
 
-export default ProfileScreen;
+export default ProfileScreen;*/
